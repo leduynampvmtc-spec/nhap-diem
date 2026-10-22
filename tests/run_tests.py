@@ -3,6 +3,7 @@ Dùng dữ liệu giả lập — không chứa tên HSSV thật."""
 import datetime as dt
 import os
 import random
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -14,6 +15,13 @@ import openpyxl
 from nhapdiem import controller as ctl, core, forms_pdf as F, pdfgrid, phieu_xlsx
 
 FAILS = []
+
+
+def _run(cmd, **kw):
+    """subprocess an toàn trên Windows: giải mã UTF-8, lỗi ký tự -> thay thế; thiếu lệnh -> trả chuỗi rỗng."""
+    if shutil.which(cmd[0]) is None:
+        return subprocess.CompletedProcess(cmd, 127, "", "")
+    return subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", **kw)
 
 
 def check(name, cond, extra=""):
@@ -250,11 +258,9 @@ def run():
         check(f"xlsx {k}: footer riêng LBH/NHL + Trang &P/&N", wsf.oddFooter.center.text == ftc.center(k)
               and wsf.oddFooter.right.text == "Trang &P/&N" and wsf.oddFooter.left.text == ftc.codes[k])
     pf = ctl.export_dieu_kien(sess, out_x, F.DKOptions(ma_lhp="1"), "pdf", ftc)
-    try:
-        tf = subprocess.run(["pdftotext", "-layout", pf, "-"], capture_output=True, text=True, timeout=30).stdout
+    if shutil.which("pdftotext"):
+        tf = _run(["pdftotext", "-layout", pf, "-"], timeout=30).stdout
         check("PDF: footer mỗi trang", "BM/CL/05.01" in tf and "LBH: 07" in tf and "NHL: 01/09/2026" in tf and "Trang 1/" in tf)
-    except FileNotFoundError:
-        pass
 
 
     # ---- Tab 6: điền Form nhập điểm hệ thống ----
@@ -303,9 +309,11 @@ def run():
 
     # kiểm tra chữ trong PDF (nếu có pdftotext)
     try:
-        txt = subprocess.run(["pdftotext", "-layout", p1, "-"], capture_output=True, text=True, timeout=30).stdout
+        if not shutil.which("pdftotext"):
+            raise FileNotFoundError
+        txt = _run(["pdftotext", "-layout", p1, "-"], timeout=30).stdout
         check("PDF ĐK: có tiếng Việt, mã LHP, địa điểm", "DANH SÁCH XÉT ĐIỀU KIỆN" in txt and "010100046101" in txt and "Xưởng TBĐ" in txt)
-        txt2 = subprocess.run(["pdftotext", "-layout", p2, "-"], capture_output=True, text=True, timeout=30).stdout
+        txt2 = _run(["pdftotext", "-layout", p2, "-"], timeout=30).stdout
         check("PDF TL: chỉ có HSSV thi lại", "Lê Thị Bình" in txt2 and "Đỗ Văn Em" in txt2 and "Nguyễn Văn An" not in txt2)
     except FileNotFoundError:
         print("SKIP kiểm tra chữ trong PDF (không có pdftotext)")
@@ -316,10 +324,10 @@ def run():
     make_input(inp2, rows=many)
     s70 = ctl.load_session(inp2)
     pp = ctl.export_dieu_kien(s70, out, F.DKOptions(ma_lhp="1"))
-    pages = subprocess.run(["pdfinfo", pp], capture_output=True, text=True).stdout if subprocess.run(["which", "pdfinfo"], capture_output=True).returncode == 0 else ""
+    pages = _run(["pdfinfo", pp]).stdout if shutil.which("pdfinfo") else ""
     if pages:
         n = int([l for l in pages.splitlines() if l.startswith("Pages:")][0].split()[1])
-        txt = subprocess.run(["pdftotext", "-layout", "-f", str(n), "-l", str(n), pp, "-"], capture_output=True, text=True).stdout
+        txt = _run(["pdftotext", "-layout", "-f", str(n), "-l", str(n), pp, "-"]).stdout
         check("70 HSSV: trang cuối có cả dòng dữ liệu và chữ ký", "GIÁO VIÊN GIẢNG DẠY" in txt and "Học Viên" in txt, f"{n} trang")
 
     # lỗi thân thiện
