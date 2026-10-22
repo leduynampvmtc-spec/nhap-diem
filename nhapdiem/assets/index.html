@@ -158,7 +158,7 @@ details summary{cursor:pointer; font-weight:700; font-size:13.5px; color:var(--b
       </div>
     </div>
     <div class="row" style="margin-top:6px">
-      <div><label class="f">Mã LHP <small>(tab 1, 2)</small></label><input type="text" data-k="ma_lhp" class="mono"></div>
+      <div><label class="f">Mã LHP <small>(tab 3, 4)</small></label><input type="text" data-k="ma_lhp" class="mono"></div>
       <div><label class="f">Ngày lập <small>dd/mm/yyyy</small></label><input type="text" data-k="ngay" class="mono" placeholder="dd/mm/yyyy"></div>
       <div><label class="f">Tổ bộ môn</label><input type="text" data-k="tbm"></div>
     </div>
@@ -180,7 +180,7 @@ details summary{cursor:pointer; font-weight:700; font-size:13.5px; color:var(--b
   </div>
 
   <div class="card" style="margin-top:20px">
-    <h3>Định dạng xuất &amp; Footer <small style="text-transform:none;letter-spacing:0">(áp dụng cho tab 1–4)</small></h3>
+    <h3>Định dạng xuất &amp; Footer <small style="text-transform:none;letter-spacing:0">(áp dụng cho tab 3–6)</small></h3>
     <div class="row">
       <div>
         <label class="f">Định dạng file xuất</label>
@@ -216,16 +216,21 @@ details summary{cursor:pointer; font-weight:700; font-size:13.5px; color:var(--b
   </div>
 
   <nav class="tabs" id="tabs">
-    <button class="tab active" data-tab="dk">1 · Điều kiện dự thi</button>
-    <button class="tab" data-tab="tl">2 · Thi lại</button>
-    <button class="tab" data-tab="lt">3 · Điểm thi LT</button>
-    <button class="tab" data-tab="xtt">4 · Xếp thứ tự</button>
-    <button class="tab" data-tab="phieu">5 · Phiếu đánh giá TH</button>
-    <button class="tab" data-tab="nhap">6 · Nhập điểm hệ thống</button>
+    <button class="tab active" data-tab="tong1">1 · Tính điểm lần 1</button>
+    <button class="tab" data-tab="tong2">2 · Tính điểm lần 2</button>
+    <button class="tab" data-tab="dk">3 · Điều kiện dự thi</button>
+    <button class="tab" data-tab="tl">4 · Thi lại</button>
+    <button class="tab" data-tab="lt">5 · Điểm thi LT</button>
+    <button class="tab" data-tab="xtt">6 · Xếp thứ tự</button>
+    <button class="tab" data-tab="phieu">7 · Phiếu đánh giá TH</button>
+    <button class="tab" data-tab="nhap">8 · Nhập điểm hệ thống</button>
   </nav>
 
-  <!-- TAB 1 -->
-  <section class="grid2 panel" id="p-dk">
+  <!-- TAB 1, 2 : TÍNH ĐIỂM TỔNG KẾT (tạo bằng JS) -->
+  <div id="tongHost"></div>
+
+  <!-- TAB 3 -->
+  <section class="grid2 panel hide" id="p-dk">
     <div class="card">
       <h3>Thông số điều kiện dự thi</h3>
       <label class="f">Hình thức thi — Lý thuyết <small>(hàng 11–12)</small></label>
@@ -336,7 +341,7 @@ details summary{cursor:pointer; font-weight:700; font-size:13.5px; color:var(--b
           <div class="n" id="nmQt">Bấm để chọn hoặc kéo thả tệp vào đây</div>
         </div>
         <input type="file" id="fileQt" accept=".xls,.xlsx,.xlsm" class="hide">
-        <div class="sub" style="margin-top:8px">Quy chế xét ĐK dự thi lấy theo tab 1 (2021 / 2022) và file điểm danh nếu đã chọn.</div>
+        <div class="sub" style="margin-top:8px">Quy chế xét ĐK dự thi lấy theo tab 3 (2021 / 2022) và file điểm danh nếu đã chọn.</div>
         <div style="margin-top:12px"><button class="btn primary" data-go="qt">Điền &amp; xuất file</button></div>
         <div class="result" id="res-qt"></div></div>
     </div>
@@ -508,6 +513,54 @@ $("#tabs").addEventListener("click", e => {
   $$(".tab").forEach(t => t.classList.toggle("active", t === b));
   $$(".panel").forEach(p => show(p, p.id === "p-" + b.dataset.tab));
 });
+
+/* ---------- tính điểm tổng kết (tab 1: lần 1, tab 2: lần 2) ---------- */
+function buildTong(n){
+  const l2 = n === 2;
+  const desc = l2
+    ? 'Tính theo macro VBA <b>L2 → TK_L2</b> cho HSSV <b>“Thi lại”</b> ở lần 1: điểm thi lần 2 nhập ở cột <b>T (LT)</b>, <b>U (TH)</b> của Form nhập điểm. HSSV đã Đạt ở lần 1 giữ nguyên kết quả.'
+    : 'Tính theo macro VBA <b>TBC_KT → L1 → TK_L1</b>: TBC KT, TBC điểm thi lần 1, điểm tổng kết, đánh giá (Đạt / Thi lại / Học lại) và ghi chú.';
+  const extra = l2 ? '<th class="n">Thi LT L2</th><th class="n">Thi TH L2</th><th class="n">TBC thi L2</th><th class="n">Tổng kết L2</th>' : '';
+  return `<section class="panel ${n===1?'':'hide'}" id="p-tong${n}">
+    <div class="grid2">
+      <div class="card"><h3>Tính điểm tổng kết — lần ${n}</h3>
+        <div class="sub" style="font-size:14px">${desc}</div>
+        <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
+          <button class="btn primary" data-tinh="${n}">Tính điểm</button>
+          <button class="btn ghost" data-go="tong${n}">Xuất Excel (bản sao Form nhập điểm)</button>
+        </div>
+        <div class="sub" style="margin-top:8px">File xuất là <b>bản sao</b> Form nhập điểm, đã ghi các cột tính toán và tô màu như macro (vàng &lt; 5, cam 7–8, xanh ≥ 8). File gốc không bị sửa.</div>
+        <div class="result" id="res-tong${n}"></div>
+      </div>
+      <div class="stack"><div class="card"><h3>Kết quả</h3>
+        <div id="tkMsg${n}" class="sub">Chọn Form nhập điểm rồi bấm “Tính điểm”.</div>
+        <div id="tkDem${n}" class="hide" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px"></div></div></div>
+    </div>
+    <div class="card hide" id="tkCard${n}" style="margin-top:16px"><div class="scroll" style="max-height:520px"><table><thead><tr>
+      <th class="n">STT</th><th>Họ và tên</th><th class="n">TBC KT</th><th class="n">Thi LT</th><th class="n">Thi TH</th><th class="n">TBC thi L1</th><th class="n">Tổng kết L1</th>${extra}<th>Đánh giá</th><th>Ghi chú</th></tr></thead>
+      <tbody id="tkBody${n}"></tbody></table></div></div>
+  </section>`;
+}
+$("#tongHost").innerHTML = buildTong(1) + buildTong(2);
+async function tinhDiem(n, btn){
+  const m = $("#tkMsg"+n);
+  if(!$("#nmInput").textContent.startsWith("✔")){ m.textContent = "Chưa chọn Form nhập điểm (ô ① phía trên)."; m.className = "notice err"; return; }
+  const old = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Đang tính…';
+  try{
+    const d = await api("POST", "/api/tinh", Object.assign(collect(), {lan_tk: n}));
+    const l2 = n === 2;
+    m.className = "sub"; m.textContent = `${d.meta.loai || ""}: ${d.meta.ten} — ${d.meta.n} HSSV · lần ${n}.` +
+      (l2 && d.chua_l2 ? `  ⚠ ${d.chua_l2} HSSV thi lại chưa có điểm lần 2 (cột T, U trống).` : "");
+    const dem = $("#tkDem"+n); show(dem, true);
+    dem.innerHTML = ["Đạt","Thi lại","Học lại"].map(k => `<span class="badge">${k}: <b>${d.dem[k]}</b></span>`).join("");
+    $("#tkBody"+n).innerHTML = d.rows.map(r => `<tr><td class="n">${r.stt}</td><td>${esc(r.name)}</td><td class="n">${esc(r.o)}</td><td class="n">${esc(r.p)}</td><td class="n">${esc(r.q)}</td><td class="n">${esc(r.r)}</td><td class="n"><b>${esc(r.s)}</b></td>` +
+      (l2 ? `<td class="n">${esc(r.t)}</td><td class="n">${esc(r.u)}</td><td class="n">${esc(r.v)}</td><td class="n"><b>${esc(r.w)}</b></td>` : "") +
+      `<td>${esc(r.x)}</td><td>${esc(r.y)}</td></tr>`).join("");
+    show($("#tkCard"+n), true);
+  }catch(e){ m.className = "notice err"; m.textContent = e.message; show($("#tkCard"+n), false); show($("#tkDem"+n), false); }
+  finally{ btn.disabled = false; btn.innerHTML = old; }
+}
+$$("[data-tinh]").forEach(b => b.onclick = () => tinhDiem(+b.dataset.tinh, b));
 
 /* ---------- cập nhật footer ---------- */
 $("#btnFooter").onclick = async () => {

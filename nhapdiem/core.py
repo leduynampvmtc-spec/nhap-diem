@@ -181,6 +181,8 @@ class Student:
     o: Cell = None   # TBC KT
     r: Cell = None   # TBC thi lần 1
     s: Cell = None   # tổng kết lần 1
+    v: Cell = None   # TBC thi lần 2
+    w: Cell = None   # tổng kết lần 2
     x: str = ""      # đánh giá
     y: str = ""      # ghi chú
     # % tiết vắng (từ file điểm danh)
@@ -383,9 +385,82 @@ def compute_lan1(students: List[Student], meta: Meta) -> None:
             st.q = DASH
 
 
-def compute_all(students: List[Student], meta: Meta) -> None:
+# ----------------------------------------------------------------------------
+# Lần 2 (L2, TK_L2)
+# ----------------------------------------------------------------------------
+def _vge(v: Cell, n: float) -> bool:
+    """v >= n kiểu VBA Variant: ô trống = 0; chuỗi ("-") luôn lớn hơn số."""
+    if v is None:
+        return 0 >= n
+    return v >= n if is_num(v) else True
+
+
+def _vlt(v: Cell, n: float) -> bool:
+    if v is None:
+        return 0 < n
+    return v < n if is_num(v) else False
+
+
+def _n0(v: Cell) -> float:
+    return float(v) if is_num(v) else 0.0
+
+
+def compute_lan2(students: List[Student], meta: Meta) -> int:
+    """Port Sub L2 + TK_L2. Chỉ tính cho HSSV "Thi lại" ở lần 1 (các HSSV khác giữ kết quả lần 1,
+    T:W = "-" giống TK_L1). Trả về số HSSV thi lại chưa có điểm lần 2."""
+    w_lt, w_th = meta.gio_lt / 15, meta.gio_th / 30
+    chua = 0
+    for st in students:
+        if st.x != "Thi lại":
+            st.t = st.u = st.v = st.w = DASH
+            continue
+        if st.t is None and st.u is None:
+            chua += 1
+        tbc = st._tbc_raw if st._tbc_raw is not None else 0.0
+        o_ok = is_num(st.o) and st.o >= 5
+        T, U = st.t, st.u
+        # ---- L2: điểm TBC thi lần 2 (V) ----
+        V: Cell = DASH
+        if meta.la_mo_dun:
+            if o_ok and U != DASH:
+                if T != DASH and (w_lt + w_th) > 0:
+                    V = xl_round((_n0(T) * w_lt + _n0(U) * w_th) / (w_lt + w_th), 1)
+                else:
+                    V = U
+        elif meta.la_mon_hoc:
+            U = DASH
+            V = T
+        st.u, st.v = U, V
+        # ---- TK_L2: tổng kết lần 2 (W), đánh giá (X), ghi chú (Y) ----
+        st.x, st.y = "", ""
+        W: Cell = DASH
+        if meta.la_mo_dun:
+            if o_ok:
+                if T != DASH and (w_lt + w_th) > 0:
+                    W = xl_round(((_n0(T) * w_lt + _n0(U) * w_th) / (w_lt + w_th)) * 0.6 + tbc * 0.4, 1)
+                else:
+                    W = xl_round(_n0(V) * 0.6 + tbc * 0.4, 1)
+            if _vge(st.s, 5) or _vge(W, 5):
+                st.x = "Đạt"
+            if (_vlt(V, 5) and V != DASH) or (_vlt(U, 3) and U != DASH) or (_vlt(T, 3) and T != DASH):
+                st.x, st.y = "Học lại", "Điểm thi lần thứ hai  <5"
+        elif meta.la_mon_hoc:
+            if o_ok:
+                W = xl_round(_n0(V) * 0.6 + tbc * 0.4, 1)
+            if (_vge(st.s, 5) and st.s != DASH and _vge(st.r, 5) and st.r != DASH) or \
+                    (_vge(W, 5) and W != DASH and _vge(V, 5) and V != DASH):
+                st.x = "Đạt"
+            else:
+                st.x = "Học lại"
+        st.w = W
+    return chua
+
+
+def compute_all(students: List[Student], meta: Meta, lan: int = 1) -> None:
     compute_tbc_kt(students, meta)
     compute_lan1(students, meta)
+    if lan == 2:
+        compute_lan2(students, meta)
 
 
 # ----------------------------------------------------------------------------

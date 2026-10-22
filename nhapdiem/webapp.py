@@ -34,7 +34,7 @@ CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".nhapdiem_web_config.json")
 DEFAULT_OUT = os.path.join(os.path.expanduser("~"), "Downloads", "NhapDiem_xuat")
 MAX_UPLOAD = 40 * 1024 * 1024
 SAVED_KEYS = {"out_dir", "tbm", "ma_lhp", "dia_diem", "so_ca", "tg_ca", "tg_tt", "quy_che", "ht_lt", "dd_th",
-              "ca_thi", "ngay", "fmt", "ft_dk", "ft_tl", "ft_lt", "ft_tk", "ft_lbh", "ft_nhl", "ft_lbh_dk", "ft_lbh_tl", "ft_lbh_lt", "ft_lbh_tk", "ft_nhl_dk", "ft_nhl_tl", "ft_nhl_lt", "ft_nhl_tk", "tn_may", "tn_giay", "van_dap", "tu_luan", "ht_khac", "drop", "last_user"}
+              "ca_thi", "ngay", "fmt", "ft_dk", "ft_tl", "ft_lt", "ft_tk", "ft_lbh", "ft_nhl", "lan_tk", "ft_lbh_dk", "ft_lbh_tl", "ft_lbh_lt", "ft_lbh_tk", "ft_nhl_dk", "ft_nhl_tl", "ft_nhl_lt", "ft_nhl_tk", "tn_may", "tn_giay", "van_dap", "tu_luan", "ht_khac", "drop", "last_user"}
 
 
 def _log(msg: str) -> None:
@@ -109,10 +109,10 @@ def meta_dict(sess: ctl.Session) -> dict:
             "la_mo_dun": m.la_mo_dun, "n": len(sess.students)}
 
 
-def do_load(opts: dict, use_att: bool, drop: bool) -> ctl.Session:
+def do_load(opts: dict, use_att: bool, drop: bool, lan: int = 1) -> ctl.Session:
     inp = STATE.paths.get("input", "")
     att = STATE.paths.get("att", "") if use_att else ""
-    return ctl.load_session(inp, att, drop_unmatched=drop)
+    return ctl.load_session(inp, att, drop_unmatched=drop, lan=lan)
 
 
 def do_export(kind: str, opts: dict) -> dict:
@@ -144,6 +144,11 @@ def do_export(kind: str, opts: dict) -> dict:
     elif kind == "xtt":
         sess = do_load(opts, False, False)
         path = ctl.export_xep_thu_tu(sess, out_dir, ngay, fmt, ft)
+    elif kind in ("tong1", "tong2"):
+        lan = 2 if kind == "tong2" else 1
+        sess = do_load(opts, False, False, lan)
+        path, n = ctl.export_tong_ket(STATE.paths.get("input", ""), sess, out_dir, ngay, lan)
+        extra = f"{n} HSSV"
     elif kind == "qt":
         sess = do_load(opts, True, _b(opts, "drop", True))
         path, ws_ = ctl.export_nhap_qua_trinh(sess, STATE.paths.get("tpl_qt", ""), out_dir, ngay, _s(opts, "quy_che", "2022"))
@@ -339,11 +344,19 @@ class Handler(BaseHTTPRequestHandler):
                 sess = do_load(d, bool(STATE.paths.get("att")), bool(d.get("drop", False)))
                 return self._json({"ok": True, "meta": meta_dict(sess), "warnings": sess.warnings,
                                    "students": student_rows(sess)})
-            m = re.match(r"^/api/export/(dk|tl|lt|xtt|phieu|qt|kt)$", path)
+            m = re.match(r"^/api/export/(tong1|tong2|dk|tl|lt|xtt|phieu|qt|kt)$", path)
             if m:
                 d = self._read_json()
                 STATE.save_config({k: v for k, v in d.items() if k in SAVED_KEYS})
                 return self._json(do_export(m.group(1), d))
+            if path == "/api/tinh":
+                d = self._read_json()
+                lan = 2 if str(d.get("lan_tk", 1)) == "2" else 1
+                sess = do_load(d, False, False, lan)
+                out = ctl.bang_tong_ket(sess)
+                out.update({"ok": True, "meta": meta_dict(sess), "lan": lan,
+                            "chua_l2": sum(1 for r in out["rows"] if lan == 2 and r["t"] == "")})
+                return self._json(out)
             if path == "/api/open":
                 d = self._read_json()
                 p = STATE.files.get(str(d.get("id", "")))

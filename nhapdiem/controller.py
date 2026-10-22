@@ -11,7 +11,7 @@ import re
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
-from . import core, forms_import, forms_pdf as F, phieu_xlsx, xlsx_forms as X
+from . import core, forms_import, forms_pdf as F, phieu_xlsx, tongket_xlsx, xlsx_forms as X
 from .footer import FooterOptions
 
 
@@ -45,7 +45,7 @@ def parse_date(text: str) -> _dt.date:
         raise AppError("Ngày lập không hợp lệ.")
 
 
-def load_session(path: str, att_path: str = "", drop_unmatched: bool = False) -> Session:
+def load_session(path: str, att_path: str = "", drop_unmatched: bool = False, lan: int = 1) -> Session:
     if not path or not os.path.isfile(path):
         raise AppError("Chưa chọn file nhập điểm (Form nhập điểm .xlsx) hoặc file không tồn tại.")
     try:
@@ -54,7 +54,7 @@ def load_session(path: str, att_path: str = "", drop_unmatched: bool = False) ->
         raise AppError(f"Không đọc được file nhập điểm:\n{e}")
     if not students:
         raise AppError("Không tìm thấy HSSV nào trong sheet DIEM TK (cột B từ hàng 10).")
-    core.compute_all(students, meta)
+    core.compute_all(students, meta, lan)
     if att_path:
         if not os.path.isfile(att_path):
             raise AppError("File điểm danh không tồn tại.")
@@ -180,3 +180,21 @@ def export_nhap_ket_thuc(sess: Session, tpl: str, out_dir: str, ngay: _dt.date, 
     except forms_import.TemplateError as e:
         raise AppError(str(e))
     return path, w
+
+
+def bang_tong_ket(sess: Session) -> dict:
+    """Dữ liệu hiển thị tab Tính điểm tổng kết (lần 1 hoặc lần 1 + 2 tùy cách nạp session)."""
+    f = lambda v: core.fmt_score(v) if core.is_num(v) else ("-" if v == core.DASH else "")
+    rows, dem = [], {"Đạt": 0, "Thi lại": 0, "Học lại": 0, "": 0}
+    for st in sess.students:
+        dem[st.x if st.x in dem else ""] += 1
+        rows.append({"stt": st.stt, "name": st.name, "mssv": st.mssv, "o": f(st.o), "p": f(st.p), "q": f(st.q),
+                     "r": f(st.r), "s": f(st.s), "t": f(st.t), "u": f(st.u), "v": f(st.v), "w": f(st.w),
+                     "x": st.x, "y": st.y})
+    return {"rows": rows, "dem": dem}
+
+
+def export_tong_ket(src: str, sess: Session, out_dir: str, ngay: _dt.date, lan: int = 1) -> Tuple[str, int]:
+    path = target_path(out_dir, sess, "TONGKET", ngay, "xlsx", "L2" if lan == 2 else "L1")
+    n = tongket_xlsx.ghi_ket_qua(src, path, sess.meta, sess.students, lan)
+    return path, n

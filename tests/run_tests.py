@@ -281,6 +281,26 @@ def run():
     except ctl.AppError:
         check("Tab6: thiếu file mẫu báo lỗi", True)
 
+
+    # ---- Tab 1: tính điểm tổng kết (L1 + L2) ----
+    mm_t = core.Meta(loai="MÔN HỌC", ten="T", gio_lt=30, gio_th=0, tin_chi=2)
+    st_t = core.Student(row=10, stt=1, name="A", tx1=7.0, tx2=core.DASH, dk=[7.0] + [None] * 9)
+    st_t.p, st_t.t = 4.0, 6.0
+    core.compute_all([st_t], mm_t, 1)
+    check("TK lần 1: thi 4.0, TBC 7.0 -> tổng kết 5.2, Thi lại", st_t.s == 5.2 and st_t.x == "Thi lại", f"{st_t.s} {st_t.x}")
+    core.compute_all([st_t], mm_t, 2)
+    check("TK lần 2: thi lại 6.0 -> V 6.0, W 6.4, Đạt", st_t.v == 6.0 and st_t.w == 6.4 and st_t.x == "Đạt", f"{st_t.v} {st_t.w} {st_t.x}")
+    st_u = core.Student(row=11, stt=2, name="B", tx1=7.0, tx2=core.DASH, dk=[7.0] + [None] * 9)
+    st_u.p, st_u.t = 4.0, 4.5
+    core.compute_all([st_u], mm_t, 2)
+    check("TK lần 2: thi lại 4.5 -> Học lại", st_u.x == "Học lại" and st_u.w == 5.5, f"{st_u.w} {st_u.x}")
+    bt = ctl.bang_tong_ket(sess)
+    check("Tab1: bảng kết quả đủ HSSV + đếm", len(bt["rows"]) == len(sess.students) and sum(bt["dem"].values()) == len(sess.students))
+    ptk, ntk = ctl.export_tong_ket(inp, sess, out_x, dd, 1)
+    wtk = openpyxl.load_workbook(ptk)["DIEM TK"]
+    check("Tab1: xuất Excel ghi TBC KT (O) và tổng kết (S)", ntk == len(sess.students) and
+          wtk.cell(sess.students[0].row, 15).value == sess.students[0].o and wtk.cell(sess.students[0].row, 19).value == sess.students[0].s)
+
     # kiểm tra chữ trong PDF (nếu có pdftotext)
     try:
         txt = subprocess.run(["pdftotext", "-layout", p1, "-"], capture_output=True, text=True, timeout=30).stdout

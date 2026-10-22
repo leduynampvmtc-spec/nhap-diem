@@ -77,3 +77,10 @@ từ Form nhập điểm theo Mã sinh viên rồi xuất file mới (giữ nguy
 - Windows: chạy `build_win.bat` → `dist\Phan_mem_Nhap_Diem_LDN_PV_College.exe` (bấm đúp, tự mở trình duyệt).
 - macOS: chạy `build_mac.sh` → `dist/Phan_mem_Nhap_Diem_LDN_PV_College.app`.
 - Hoặc đẩy lên GitHub → Actions → "Build app" để tự build cả hai.
+
+## Tab 1 & 2 · Tính điểm lần 1 / lần 2
+- **Tab 1 – Lần 1**: port `TBC_KT → L1 → TK_L1` (TBC KT, TBC thi, tổng kết, Đạt / Thi lại / Học lại, ghi chú).
+- **Tab 2 – Lần 2**: port `L2 → TK_L2` cho HSSV "Thi lại" (điểm thi lần 2 nhập ở cột T, U); HSSV đã Đạt giữ kết quả lần 1.
+- Nút **Xuất Excel** tạo *bản sao* Form nhập điểm đã ghi các cột D, O–Y và tô màu như macro; tên file có `_L1` / `_L2`
+  (vd `221026_TONGKET_CO KY THUAT_SCTBCBDK 1-2025_L1.xlsx`). File gốc không bị sửa.
+- Thứ tự tab hiện tại: 1 Lần 1 · 2 Lần 2 · 3 Điều kiện dự thi · 4 Thi lại · 5 Điểm thi LT · 6 Xếp thứ tự · 7 Phiếu TH · 8 Nhập điểm hệ thống.
