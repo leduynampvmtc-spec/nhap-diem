@@ -38,7 +38,7 @@ def _pf(ft, key):
     """Hàm vẽ footer mỗi trang (Mã biểu mẫu | LBH/NHL | Trang i/N) hoặc None."""
     if ft is None:
         return None
-    return lambda c, i, n, w, h, ml, mr: draw_page_footer(c, i, n, w, ml, mr, ft.left(key), ft.center())
+    return lambda c, i, n, w, h, ml, mr: draw_page_footer(c, i, n, w, ml, mr, ft.left(key), ft.center(key))
 
 
 def dk_rows(students: List[Student], opt: "DKOptions") -> List[list]:

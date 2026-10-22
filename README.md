@@ -65,11 +65,11 @@ Font: dùng Times New Roman của máy nếu có, nếu không dùng Liberation 
 
 ## Định dạng xuất & Footer (tab 1–4)
 - Khung "Định dạng xuất & Footer" cho chọn **PDF** hoặc **Excel (.xlsx)** cho 4 file Điều kiện dự thi / Thi lại / Điểm thi LT / Xếp thứ tự.
-- Nút **Cập nhật Footer** lưu: Mã biểu mẫu từng file (mặc định BM/CL/05.01, 05.02, 05.04a; Xếp thứ tự để trống), LBH, NHL.
+- Nút **Cập nhật Footer** lưu cho **từng file riêng**: Mã biểu mẫu (mặc định BM/CL/05.01, 05.02, 05.04a; Xếp thứ tự để trống), LBH và NHL (ngày hiệu lực) — 4 file có thể khác nhau.
 - Footer in ở chân mỗi trang: `Mã biểu mẫu | LBH … NHL … | Trang x/y` (Times New Roman 12) — cả PDF lẫn xlsx (xlsx dùng footer in của Excel, khổ A4, tiêu đề bảng lặp lại mỗi trang).
 
 ## Tab 6 · Nhập điểm hệ thống
-Chọn file mẫu của hệ thống (Form nhập quá trình / Form nhập thi kết thúc mô đun, **đã lưu thành .xlsx**) → app điền điểm
+Chọn file mẫu của hệ thống (Form nhập quá trình / Form nhập thi kết thúc mô đun, **.xls hoặc .xlsx**, file xuất giữ cùng đuôi; .xls cần thư viện xlrd/xlwt/xlutils có trong requirements.txt) → app điền điểm
 từ Form nhập điểm theo Mã sinh viên rồi xuất file mới (giữ nguyên định dạng mẫu). Cột được nhận bằng mã ở hàng 6
 (DiemHeSo11/12/21–25, DiemTBThuongKy, DuocDuThiKetThuc, DiemTongKet, DiemThiKN1 = LT, DiemThiKN2 = TH).
 

@@ -75,7 +75,7 @@ class Sheet:
 
 
 def apply_footer(ws, ft: FooterOptions, key: str) -> None:
-    left, center, right = ft.left(key), ft.center(), "Trang &P/&N"
+    left, center, right = ft.left(key), ft.center(key), "Trang &P/&N"
     for part, txt in ((ws.oddFooter.left, left), (ws.oddFooter.center, center), (ws.oddFooter.right, right)):
         part.text = txt
         part.size = 12

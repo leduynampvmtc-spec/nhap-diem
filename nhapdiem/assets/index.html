@@ -42,6 +42,10 @@ button{font-family:inherit; cursor:pointer}
 .tab.active{background:var(--navy); color:#fff; border-color:var(--navy)}
 .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 20px; box-shadow:0 1px 3px rgba(20,33,61,.05)}
 .card h3{margin:0 0 12px; font-size:12.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
+.ftgrid{display:grid; grid-template-columns:150px 1.4fr .6fr 1fr; gap:8px 12px; align-items:center; margin-top:6px}
+.ftgrid .fth{font-size:12px; color:var(--muted); font-weight:600}
+.ftgrid .ftn{font-size:13.5px; font-weight:600}
+@media(max-width:760px){.ftgrid{grid-template-columns:1fr 1fr}}
 .card.res{border-top:3px solid var(--blue)}
 .grid2{display:grid; grid-template-columns:minmax(300px,380px) 1fr; gap:20px; align-items:start; margin-top:20px}
 .stack>*+*{margin-top:16px}
@@ -186,18 +190,27 @@ details summary{cursor:pointer; font-weight:700; font-size:13.5px; color:var(--b
         </div>
       </div>
     </div>
-    <label class="f" style="margin-top:12px">Footer — Mã biểu mẫu (góc trái)</label>
-    <div class="row">
-      <div><label class="f"><small>1 · Điều kiện dự thi</small></label><input type="text" data-k="ft_dk" class="mono"></div>
-      <div><label class="f"><small>2 · Thi lại</small></label><input type="text" data-k="ft_tl" class="mono"></div>
-      <div><label class="f"><small>3 · Điểm thi LT</small></label><input type="text" data-k="ft_lt" class="mono"></div>
-      <div><label class="f"><small>4 · Xếp thứ tự</small></label><input type="text" data-k="ft_tk" class="mono" placeholder="(để trống = không in)"></div>
+    <label class="f" style="margin-top:12px">Footer của từng file <small>(mỗi file có Mã biểu mẫu, LBH, NHL riêng)</small></label>
+    <div class="ftgrid">
+      <div></div><div class="fth">Mã biểu mẫu (góc trái)</div><div class="fth">LBH</div><div class="fth">NHL (ngày hiệu lực)</div>
+      <div class="ftn">1 · Điều kiện dự thi</div>
+      <input type="text" data-k="ft_dk" class="mono">
+      <input type="text" data-k="ft_lbh_dk" class="mono">
+      <input type="text" data-k="ft_nhl_dk" class="mono" placeholder="dd/mm/yyyy">
+      <div class="ftn">2 · Thi lại</div>
+      <input type="text" data-k="ft_tl" class="mono">
+      <input type="text" data-k="ft_lbh_tl" class="mono">
+      <input type="text" data-k="ft_nhl_tl" class="mono" placeholder="dd/mm/yyyy">
+      <div class="ftn">3 · Điểm thi LT</div>
+      <input type="text" data-k="ft_lt" class="mono">
+      <input type="text" data-k="ft_lbh_lt" class="mono">
+      <input type="text" data-k="ft_nhl_lt" class="mono" placeholder="dd/mm/yyyy">
+      <div class="ftn">4 · Xếp thứ tự</div>
+      <input type="text" data-k="ft_tk" class="mono" placeholder="(để trống = không in)">
+      <input type="text" data-k="ft_lbh_tk" class="mono">
+      <input type="text" data-k="ft_nhl_tk" class="mono" placeholder="dd/mm/yyyy">
     </div>
-    <div class="row" style="margin-top:6px">
-      <div><label class="f">LBH <small>(lần ban hành)</small></label><input type="text" data-k="ft_lbh" class="mono"></div>
-      <div><label class="f">NHL <small>(ngày hiệu lực)</small></label><input type="text" data-k="ft_nhl" class="mono" placeholder="dd/mm/yyyy"></div>
-      <div style="align-self:end"><button class="btn ghost" id="btnFooter" type="button">Cập nhật Footer</button></div>
-    </div>
+    <div style="margin-top:10px"><button class="btn ghost" id="btnFooter" type="button">Cập nhật Footer</button></div>
     <div style="font-size:12.5px;color:var(--muted);margin-top:8px">Footer in ở chân mỗi trang: <b>Mã biểu mẫu</b> | <b>LBH … NHL …</b> | <b>Trang x/y</b> (Times New Roman 12).</div>
     <div id="ftMsg" class="notice info hide" style="margin-top:8px"></div>
   </div>
@@ -319,10 +332,10 @@ details summary{cursor:pointer; font-weight:700; font-size:13.5px; color:var(--b
       <div class="card res"><h3>Form nhập điểm quá trình</h3>
         <div class="sub">Điền KT thường xuyên, KT định kỳ 1–5, TBC KT, "V" (đủ ĐK dự thi) và điểm tổng kết vào file mẫu của hệ thống.</div>
         <div class="drop" id="dropQt" tabindex="0" style="margin-top:12px">
-          <div class="t">File mẫu Form nhập quá trình (.xlsx)</div>
+          <div class="t">File mẫu Form nhập quá trình (.xls / .xlsx)</div>
           <div class="n" id="nmQt">Bấm để chọn hoặc kéo thả tệp vào đây</div>
         </div>
-        <input type="file" id="fileQt" accept=".xlsx,.xlsm" class="hide">
+        <input type="file" id="fileQt" accept=".xls,.xlsx,.xlsm" class="hide">
         <div class="sub" style="margin-top:8px">Quy chế xét ĐK dự thi lấy theo tab 1 (2021 / 2022) và file điểm danh nếu đã chọn.</div>
         <div style="margin-top:12px"><button class="btn primary" data-go="qt">Điền &amp; xuất file</button></div>
         <div class="result" id="res-qt"></div></div>
@@ -331,10 +344,10 @@ details summary{cursor:pointer; font-weight:700; font-size:13.5px; color:var(--b
       <div class="card res"><h3>Form nhập điểm thi kết thúc mô đun</h3>
         <div class="sub">Điền điểm thi LT (DiemThiKN1) và TH (DiemThiKN2) vào file mẫu của hệ thống.</div>
         <div class="drop" id="dropKt" tabindex="0" style="margin-top:12px">
-          <div class="t">File mẫu Form nhập thi kết thúc mô đun (.xlsx)</div>
+          <div class="t">File mẫu Form nhập thi kết thúc mô đun (.xls / .xlsx)</div>
           <div class="n" id="nmKt">Bấm để chọn hoặc kéo thả tệp vào đây</div>
         </div>
-        <input type="file" id="fileKt" accept=".xlsx,.xlsm" class="hide">
+        <input type="file" id="fileKt" accept=".xls,.xlsx,.xlsm" class="hide">
         <label class="f">Lần thi</label>
         <div class="seg">
           <label><input type="radio" name="lan_kt" value="1"> Lần 1</label>
@@ -342,7 +355,7 @@ details summary{cursor:pointer; font-weight:700; font-size:13.5px; color:var(--b
         </div>
         <div style="margin-top:12px"><button class="btn primary" data-go="kt">Điền &amp; xuất file</button></div>
         <div class="result" id="res-kt"></div></div>
-      <div class="notice info">File mẫu tải từ hệ thống thường là <b>.xls</b>: mở bằng Excel → <i>Save As</i> → <i>Excel Workbook (.xlsx)</i> rồi chọn ở đây. File xuất ra là .xlsx (HSSV khớp theo Mã sinh viên).</div>
+      <div class="notice info">Nhận cả <b>.xls</b> lẫn <b>.xlsx</b>. File xuất ra giữ <b>cùng đuôi</b> với file mẫu (HSSV khớp theo Mã sinh viên).</div>
     </div>
   </section>
 
@@ -400,7 +413,7 @@ $("#btnQuit").onclick = async () => {
 
 /* ---------- cấu hình ---------- */
 const DEFAULTS = {tbm:"CƠ KHÍ", dia_diem:"Phòng máy tính", so_ca:"-", tg_ca:"-", tg_tt:"-", quy_che:"2022",
-  ft_dk:"BM/CL/05.01", ft_tl:"BM/CL/05.02", ft_lt:"BM/CL/05.04a", ft_tk:"", ft_lbh:"06", ft_nhl:"02/03/2026", fmt:"pdf",
+  ft_dk:"BM/CL/05.01", ft_tl:"BM/CL/05.02", ft_lt:"BM/CL/05.04a", ft_tk:"", ft_lbh_dk:"06", ft_nhl_dk:"02/03/2026", ft_lbh_tl:"06", ft_nhl_tl:"02/03/2026", ft_lbh_lt:"06", ft_nhl_lt:"02/03/2026", ft_lbh_tk:"06", ft_nhl_tk:"02/03/2026", fmt:"pdf",
   ht_lt:"Thi trắc nghiệm trên máy tính", dd_th:"xưởng TBĐ", tn_may:true, drop:true, ca_thi:""};
 function todayStr(){ const d=new Date(), p=n=>String(n).padStart(2,"0"); return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear(); }
 function fillConfig(cfg){
@@ -429,8 +442,8 @@ function setName(kind, name){
 async function upload(kind, file){
   showMsg($("#loadErr"), "");
   if(!file) return;
-  if(kind.startsWith("tpl_") && /\.xls$/i.test(file.name)){ alert("File .xls (Excel cũ) chưa đọc được.\nMở bằng Excel → Save As → Excel Workbook (.xlsx) rồi chọn lại."); return; }
-  if(!/\.(xlsx|xlsm)$/i.test(file.name)){ showMsg($("#loadErr"), "Chỉ nhận tệp Excel (.xlsx hoặc .xlsm)."); return; }
+  const okExt = kind.startsWith("tpl_") ? /\.(xlsx|xlsm|xls)$/i : /\.(xlsx|xlsm)$/i;
+  if(!okExt.test(file.name)){ showMsg($("#loadErr"), "Chỉ nhận tệp Excel (.xls, .xlsx)."); return; }
   try{
     const buf = await file.arrayBuffer();
     await api("POST", `/api/upload?kind=${kind}&name=${encodeURIComponent(file.name)}`, buf, true);
@@ -498,7 +511,7 @@ $("#tabs").addEventListener("click", e => {
 
 /* ---------- cập nhật footer ---------- */
 $("#btnFooter").onclick = async () => {
-  const o = collect(), keys = ["ft_dk","ft_tl","ft_lt","ft_tk","ft_lbh","ft_nhl"], upd = {fmt:o.fmt};
+  const o = collect(), keys = ["dk","tl","lt","tk"].flatMap(k => ["ft_"+k,"ft_lbh_"+k,"ft_nhl_"+k]), upd = {fmt:o.fmt};
   keys.forEach(k => upd[k] = o[k] || "");
   const m = $("#ftMsg");
   try{ await api("POST","/api/config",upd); m.textContent = "✔ Đã cập nhật Footer — sẽ dùng cho các file xuất tiếp theo (PDF và Excel)."; m.className = "notice info"; }

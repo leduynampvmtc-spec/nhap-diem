@@ -34,7 +34,7 @@ CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".nhapdiem_web_config.json")
 DEFAULT_OUT = os.path.join(os.path.expanduser("~"), "Downloads", "NhapDiem_xuat")
 MAX_UPLOAD = 40 * 1024 * 1024
 SAVED_KEYS = {"out_dir", "tbm", "ma_lhp", "dia_diem", "so_ca", "tg_ca", "tg_tt", "quy_che", "ht_lt", "dd_th",
-              "ca_thi", "ngay", "fmt", "ft_dk", "ft_tl", "ft_lt", "ft_tk", "ft_lbh", "ft_nhl", "tn_may", "tn_giay", "van_dap", "tu_luan", "ht_khac", "drop", "last_user"}
+              "ca_thi", "ngay", "fmt", "ft_dk", "ft_tl", "ft_lt", "ft_tk", "ft_lbh", "ft_nhl", "ft_lbh_dk", "ft_lbh_tl", "ft_lbh_lt", "ft_lbh_tk", "ft_nhl_dk", "ft_nhl_tl", "ft_nhl_lt", "ft_nhl_tk", "tn_may", "tn_giay", "van_dap", "tu_luan", "ht_khac", "drop", "last_user"}
 
 
 def _log(msg: str) -> None:
@@ -315,11 +315,9 @@ class Handler(BaseHTTPRequestHandler):
                 if kind not in ("input", "att", "tpl_qt", "tpl_kt"):
                     raise ctl.AppError("Loại tệp không hợp lệ.")
                 name = os.path.basename(urllib.parse.unquote(q.get("name", ["file.xlsx"])[0])) or "file.xlsx"
-                if name.lower().endswith(".xls") and kind.startswith("tpl_"):
-                    raise ctl.AppError("File .xls (Excel cũ) chưa đọc được. Mở bằng Excel → Save As → "
-                                       "Excel Workbook (.xlsx) rồi chọn lại.")
-                if not name.lower().endswith((".xlsx", ".xlsm")):
-                    raise ctl.AppError("Chỉ nhận tệp Excel (.xlsx hoặc .xlsm).")
+                ok_ext = (".xlsx", ".xlsm", ".xls") if kind.startswith("tpl_") else (".xlsx", ".xlsm")
+                if not name.lower().endswith(ok_ext):
+                    raise ctl.AppError("Chỉ nhận tệp Excel (" + ", ".join(ok_ext) + ").")
                 data = self._body()
                 if not data:
                     raise ctl.AppError("Tệp rỗng.")

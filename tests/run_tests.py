@@ -231,7 +231,9 @@ def run():
 
     # ---- xlsx + footer cho 4 file xuất ----
     from nhapdiem.footer import FooterOptions
-    ftc = FooterOptions(codes={"dk": "BM/CL/05.01", "tl": "BM/CL/05.02", "lt": "BM/CL/05.04a", "tk": ""}, lbh="07", nhl="01/09/2026")
+    ftc = FooterOptions(codes={"dk": "BM/CL/05.01", "tl": "BM/CL/05.02", "lt": "BM/CL/05.04a", "tk": ""},
+                         lbh={"dk": "07", "tl": "08", "lt": "09", "tk": "10"},
+                         nhl={"dk": "01/09/2026", "tl": "02/09/2026", "lt": "03/09/2026", "tk": "04/09/2026"})
     dd = dt.date(2026, 10, 21)
     out_x = os.path.join(tmp, "out_x")
     xs = {
@@ -243,7 +245,9 @@ def run():
     for k, (pth, sheet) in xs.items():
         wsf = openpyxl.load_workbook(pth)[sheet]
         check(f"xlsx {k}: đuôi .xlsx, font TNR", pth.endswith(".xlsx") and wsf["A1"].font.name == "Times New Roman" or k == "tk")
-        check(f"xlsx {k}: footer LBH/NHL + Trang &P/&N", wsf.oddFooter.center.text == "LBH: 07      NHL: 01/09/2026"
+        if k == "tl":
+            check("Footer: LBH/NHL khác nhau theo file", ftc.center("tl") == "LBH: 08      NHL: 02/09/2026" and ftc.center("dk") != ftc.center("tl"))
+        check(f"xlsx {k}: footer riêng LBH/NHL + Trang &P/&N", wsf.oddFooter.center.text == ftc.center(k)
               and wsf.oddFooter.right.text == "Trang &P/&N" and wsf.oddFooter.left.text == ftc.codes[k])
     pf = ctl.export_dieu_kien(sess, out_x, F.DKOptions(ma_lhp="1"), "pdf", ftc)
     try:

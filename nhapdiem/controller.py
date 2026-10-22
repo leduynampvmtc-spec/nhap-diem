@@ -158,13 +158,13 @@ def export_phieu(sess: Session, out_dir: str, bai: int, ngay: _dt.date,
 
 def _tpl(path: str, what: str) -> str:
     if not path or not os.path.exists(path):
-        raise AppError(f"Chưa chọn file mẫu {what} (.xlsx).")
+        raise AppError(f"Chưa chọn file mẫu {what} (.xls hoặc .xlsx).")
     return path
 
 
 def export_nhap_qua_trinh(sess: Session, tpl: str, out_dir: str, ngay: _dt.date, quy_che: str = "2022") -> Tuple[str, List[str]]:
     tpl = _tpl(tpl, "Form nhập quá trình")
-    path = target_path(out_dir, sess, "NHAPQT", ngay, "xlsx")
+    path = target_path(out_dir, sess, "NHAPQT", ngay, "xls" if tpl.lower().endswith(".xls") else "xlsx")
     try:
         w = forms_import.fill_qua_trinh(tpl, path, sess.meta, sess.students, quy_che)
     except forms_import.TemplateError as e:
@@ -174,7 +174,7 @@ def export_nhap_qua_trinh(sess: Session, tpl: str, out_dir: str, ngay: _dt.date,
 
 def export_nhap_ket_thuc(sess: Session, tpl: str, out_dir: str, ngay: _dt.date, lan: int = 1) -> Tuple[str, List[str]]:
     tpl = _tpl(tpl, "Form nhập thi kết thúc mô đun")
-    path = target_path(out_dir, sess, "NHAPKT", ngay, "xlsx", "L2" if lan == 2 else "")
+    path = target_path(out_dir, sess, "NHAPKT", ngay, "xls" if tpl.lower().endswith(".xls") else "xlsx", "L2" if lan == 2 else "")
     try:
         w = forms_import.fill_ket_thuc(tpl, path, sess.meta, sess.students, lan)
     except forms_import.TemplateError as e:
