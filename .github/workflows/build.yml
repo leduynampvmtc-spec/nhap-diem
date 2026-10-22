@@ -1,0 +1,47 @@
+# Tự động build Phan_mem_Nhap_Diem_LDN_PV_College.exe (Windows) và Phan_mem_Nhap_Diem_LDN_PV_College.app (macOS) trên GitHub Actions.
+# Cách dùng: đẩy thư mục này lên một repo GitHub -> tab Actions -> "Build app" -> Run workflow
+# -> tải file ở mục Artifacts.
+name: Build app
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            sep: ";"
+            out: dist/Phan_mem_Nhap_Diem_LDN_PV_College.exe
+            name: NhapDiem-windows
+          - os: macos-latest
+            sep: ":"
+            out: dist/Phan_mem_Nhap_Diem_LDN_PV_College.app
+            name: NhapDiem-macos
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r requirements.txt
+      - run: python tests/run_tests.py
+        continue-on-error: true
+      - name: Build (Windows, one file)
+        if: runner.os == 'Windows'
+        run: python -m PyInstaller --noconfirm --clean --onefile --name Phan_mem_Nhap_Diem_LDN_PV_College --add-data "nhapdiem/fonts;nhapdiem/fonts" --add-data "nhapdiem/assets;nhapdiem/assets" --icon nhapdiem/assets/icon.ico main.py
+      - name: Build (macOS, .app)
+        if: runner.os == 'macOS'
+        run: |
+          python -m PyInstaller --noconfirm --clean --windowed --name Phan_mem_Nhap_Diem_LDN_PV_College --icon nhapdiem/assets/icon.icns --add-data "nhapdiem/fonts:nhapdiem/fonts" --add-data "nhapdiem/assets:nhapdiem/assets" main.py
+          cd dist && zip -r Phan_mem_Nhap_Diem_LDN_PV_College-macos.zip Phan_mem_Nhap_Diem_LDN_PV_College.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            dist/Phan_mem_Nhap_Diem_LDN_PV_College.exe
+            dist/Phan_mem_Nhap_Diem_LDN_PV_College-macos.zip
