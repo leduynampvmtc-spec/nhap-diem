@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xuất biểu mẫu từ Form nhập điểm</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<style>
+:root{
+  --ink:#14213d; --muted:#5d667a; --line:#e2e6ee; --card:#ffffff; --field:#f4f6fa;
+  --navy:#0e1a3a; --green:#1b8a47; --blue:#23327f; --red:#b00020; --warn-bg:#fff4f4;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family: "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif; color:var(--ink);
+  background: linear-gradient(135deg,#f4f1fb 0%,#fdf5f8 45%,#eaf4fa 100%) fixed; min-height:100vh; font-size:15px;
+}
+.wrap{max-width:1120px; margin:0 auto; padding:22px 20px 40px}
+header.top{display:flex; gap:16px; align-items:center; flex-wrap:wrap}
+.logo{width:68px;height:68px;border-radius:12px;background:#fff;border:1px solid var(--line);padding:4px;box-shadow:0 1px 4px rgba(20,33,61,.08)}
+.logo img{width:100%;height:100%;object-fit:contain;display:block}
+.titles{flex:1; min-width:260px}
+h1{margin:0; font-size:28px; letter-spacing:-.01em}
+.sub{color:var(--muted); font-size:13.5px; margin-top:3px}
+.credit{font-size:13.5px; margin-top:2px}
+.credit b{font-weight:700}
+.userbox{display:flex; gap:8px; align-items:center; font-size:13px; color:var(--muted)}
+button{font-family:inherit; cursor:pointer}
+.btn{border-radius:8px; padding:10px 18px; font-weight:700; font-size:14px; border:1px solid var(--navy)}
+.btn.primary{background:var(--navy); color:#fff}
+.btn.primary:hover{background:#1c2c5c}
+.btn.primary:disabled{background:#98a0b4; border-color:#98a0b4; cursor:not-allowed}
+.btn.ghost{background:#fff; color:var(--navy)}
+.btn.ghost:hover{background:#eef1f8}
+.btn.small{padding:6px 12px; font-size:12.5px}
+.tabs{display:flex; gap:10px; flex-wrap:wrap; margin:20px 0 0; padding-bottom:16px; border-bottom:3px solid var(--navy)}
+.tab{background:#fff; border:1px solid #d5d9e3; border-radius:7px; padding:11px 18px; font-size:13px; font-weight:700;
+  letter-spacing:.07em; text-transform:uppercase; color:#3c465d}
+.tab:hover{background:#f0f2f8}
+.tab.active{background:var(--navy); color:#fff; border-color:var(--navy)}
+.card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 20px; box-shadow:0 1px 3px rgba(20,33,61,.05)}
+.card h3{margin:0 0 12px; font-size:12.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
+.card.res{border-top:3px solid var(--blue)}
+.grid2{display:grid; grid-template-columns:minmax(300px,380px) 1fr; gap:20px; align-items:start; margin-top:20px}
+.stack>*+*{margin-top:16px}
+label.f{display:block; font-size:13px; font-weight:700; margin:12px 0 5px}
+label.f small{font-weight:400; color:var(--muted)}
+input[type=text],input[type=password],select{width:100%; height:42px; padding:0 12px; border:1px solid #dde2ea; border-radius:7px;
+  background:var(--field); font-size:15px; color:var(--ink); font-family:inherit}
+input[type=text]:focus,input[type=password]:focus,select:focus{outline:2px solid #9fb3ff; background:#fff}
+.mono{font-family:var(--mono)}
+.row{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
+.chk{display:flex; align-items:center; gap:8px; margin:7px 0; font-size:14.5px}
+.chk input{width:17px; height:17px; accent-color:var(--navy)}
+.seg{display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:6px}
+.seg label{display:flex; gap:7px; align-items:center; font-size:14.5px}
+.seg input{accent-color:var(--navy)}
+.badge{display:inline-block; font-size:11.5px; font-weight:800; letter-spacing:.07em; padding:3px 9px; border-radius:999px;
+  background:#e8f3ec; color:var(--green); border:1px solid #bfe0cb}
+.badge.mon{background:#e9ecfa; color:var(--blue); border-color:#c6cdf0}
+.notice{border:1px solid #f0c4c9; background:var(--warn-bg); color:var(--red); border-radius:9px; padding:10px 14px; font-size:14px; font-weight:600}
+.notice.info{border-color:#c6cdf0; background:#f1f3fc; color:var(--blue)}
+.err{margin-top:12px}
+.drop{border:2px dashed #c3cadb; border-radius:10px; padding:14px; text-align:center; background:#fafbfe; cursor:pointer; transition:.15s}
+.drop:hover,.drop.over{border-color:var(--blue); background:#f1f3fc}
+.drop .t{font-weight:700; font-size:14px}
+.drop .n{font-size:13px; color:var(--green); margin-top:4px; word-break:break-all}
+.drop .h{font-size:12.5px; color:var(--muted); margin-top:3px}
+.kv{display:grid; grid-template-columns:auto 1fr; gap:6px 16px; font-size:14.5px}
+.kv .k{color:var(--muted)}
+.kv .v{font-weight:700}
+.big{font-size:22px; font-weight:800; letter-spacing:-.01em}
+.result{margin-top:4px}
+.result .fn{font-family:var(--mono); font-size:13.5px; word-break:break-all; font-weight:700}
+.result .pth{font-size:12.5px; color:var(--muted); word-break:break-all; margin-top:3px}
+.result .acts{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+.ok{color:var(--green); font-weight:800}
+table{border-collapse:collapse; width:100%; font-size:13.5px}
+th,td{border-bottom:1px solid var(--line); padding:6px 8px; text-align:left}
+th{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); position:sticky; top:0; background:#fff}
+td.n,th.n{text-align:right; font-family:var(--mono)}
+.scroll{max-height:300px; overflow:auto; border:1px solid var(--line); border-radius:8px; margin-top:10px}
+details summary{cursor:pointer; font-weight:700; font-size:13.5px; color:var(--blue)}
+.hide{display:none!important}
+.foot{margin-top:26px; text-align:center; font-size:12.5px; color:var(--muted)}
+/* đăng nhập */
+.loginwrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px}
+.login{width:100%; max-width:420px; text-align:center}
+.login .big-logo{width:170px; height:170px; margin:0 auto 6px}
+.login h2{margin:6px 0 2px; font-size:21px; color:var(--blue)}
+.login .org{color:var(--green); font-weight:700; font-size:12.5px; letter-spacing:.05em; margin-bottom:14px}
+.login form{text-align:left}
+.spin{display:inline-block; width:14px; height:14px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:sp .7s linear infinite; vertical-align:-2px; margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:860px){.grid2{grid-template-columns:1fr} h1{font-size:23px}}
+</style>
+</head>
+<body>
+
+<!-- ============ ĐĂNG NHẬP ============ -->
+<div id="loginView" class="loginwrap hide">
+  <div class="card login">
+    <div class="logo big-logo"><img src="/logo.png" alt="PV College"></div>
+    <h2>Xuất biểu mẫu từ Form nhập điểm</h2>
+    <div class="org">TRƯỜNG CAO ĐẲNG DẦU KHÍ · TỔ BỘ MÔN CƠ KHÍ</div>
+    <form id="loginForm" autocomplete="on">
+      <label class="f" for="lgUser">Tài khoản</label>
+      <input type="text" id="lgUser" name="username" autocomplete="username" autocapitalize="none" spellcheck="false">
+      <label class="f" for="lgPw">Mật khẩu</label>
+      <input type="password" id="lgPw" name="password" autocomplete="current-password">
+      <div id="lgErr" class="notice err hide"></div>
+      <button class="btn primary" style="width:100%; margin-top:16px; padding:12px" type="submit">Đăng nhập</button>
+    </form>
+    <div class="sub" style="margin-top:14px">Người viết ứng dụng: <b>Giảng viên Lê Duy Nam</b></div>
+  </div>
+</div>
+
+<!-- ============ ỨNG DỤNG ============ -->
+<div id="appView" class="wrap hide">
+  <header class="top">
+    <div class="logo"><img src="/logo.png" alt="PV College"></div>
+    <div class="titles">
+      <h1>Xuất biểu mẫu từ Form nhập điểm</h1>
+      <div class="sub">Điều kiện dự thi · Thi lại · Điểm thi LT · Xếp thứ tự · Phiếu đánh giá kết quả thực hành</div>
+      <div class="credit">Người viết ứng dụng: <b>Giảng viên Lê Duy Nam</b> · Trường Cao đẳng Dầu khí</div>
+    </div>
+    <div class="userbox"><span id="userName"></span>
+      <button class="btn ghost small" id="btnLogout">Đăng xuất</button>
+      <button class="btn ghost small" id="btnQuit" title="Dừng ứng dụng">Thoát</button></div>
+  </header>
+
+  <!-- Tệp dữ liệu + dùng chung -->
+  <div class="card" style="margin-top:20px">
+    <h3>Tệp dữ liệu &amp; thông số dùng chung</h3>
+    <div class="row" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+      <div>
+        <div class="drop" id="dropInput" tabindex="0">
+          <div class="t">① Form nhập điểm (.xlsx)</div>
+          <div class="n" id="nmInput">Bấm để chọn hoặc kéo thả tệp vào đây</div>
+          <div class="h">Sheet DIEM TK</div>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx,.xlsm" class="hide">
+      </div>
+      <div>
+        <div class="drop" id="dropAtt" tabindex="0">
+          <div class="t">② File điểm danh (tuỳ chọn)</div>
+          <div class="n" id="nmAtt">Chỉ dùng cho tab Điều kiện dự thi</div>
+          <div class="h">Form_Diem_danh.xlsx — X / P / KP</div>
+        </div>
+        <input type="file" id="fileAtt" accept=".xlsx,.xlsm" class="hide">
+        <div style="text-align:right"><button class="btn ghost small hide" id="btnClearAtt" style="margin-top:6px">Bỏ file điểm danh</button></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <div><label class="f">Mã LHP <small>(tab 1, 2)</small></label><input type="text" data-k="ma_lhp" class="mono"></div>
+      <div><label class="f">Ngày lập <small>dd/mm/yyyy</small></label><input type="text" data-k="ngay" class="mono" placeholder="dd/mm/yyyy"></div>
+      <div><label class="f">Tổ bộ môn</label><input type="text" data-k="tbm"></div>
+    </div>
+    <label class="f">Thư mục lưu file xuất <small>(trên máy này)</small></label>
+    <input type="text" data-k="out_dir" class="mono">
+    <div id="loadErr" class="notice err hide"></div>
+    <div id="loadWarn" class="notice info err hide"></div>
+    <div id="summary" class="hide" style="margin-top:16px">
+      <div class="kv">
+        <div class="k">Môn / mô đun</div><div class="v"><span id="sLoai" class="badge"></span> <span id="sTen"></span></div>
+        <div class="k">Lớp – Khóa</div><div class="v mono" id="sLop"></div>
+        <div class="k">Thời lượng</div><div class="v mono" id="sGio"></div>
+        <div class="k">Số HSSV</div><div class="v mono" id="sN"></div>
+      </div>
+      <details style="margin-top:12px"><summary>Xem danh sách HSSV đã đọc</summary>
+        <div class="scroll"><table><thead><tr><th class="n">STT</th><th>Họ và tên</th><th>MSSV</th><th class="n">TBC KT</th><th class="n">Tổng kết</th><th>Đánh giá</th><th class="n">% vắng</th></tr></thead>
+        <tbody id="tbody"></tbody></table></div></details>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h3>Định dạng xuất &amp; Footer <small style="text-transform:none;letter-spacing:0">(áp dụng cho tab 1–4)</small></h3>
+    <div class="row">
+      <div>
+        <label class="f">Định dạng file xuất</label>
+        <div class="seg">
+          <label><input type="radio" name="fmt" value="pdf"> PDF</label>
+          <label><input type="radio" name="fmt" value="xlsx"> Excel (.xlsx)</label>
+        </div>
+      </div>
+    </div>
+    <label class="f" style="margin-top:12px">Footer — Mã biểu mẫu (góc trái)</label>
+    <div class="row">
+      <div><label class="f"><small>1 · Điều kiện dự thi</small></label><input type="text" data-k="ft_dk" class="mono"></div>
+      <div><label class="f"><small>2 · Thi lại</small></label><input type="text" data-k="ft_tl" class="mono"></div>
+      <div><label class="f"><small>3 · Điểm thi LT</small></label><input type="text" data-k="ft_lt" class="mono"></div>
+      <div><label class="f"><small>4 · Xếp thứ tự</small></label><input type="text" data-k="ft_tk" class="mono" placeholder="(để trống = không in)"></div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <div><label class="f">LBH <small>(lần ban hành)</small></label><input type="text" data-k="ft_lbh" class="mono"></div>
+      <div><label class="f">NHL <small>(ngày hiệu lực)</small></label><input type="text" data-k="ft_nhl" class="mono" placeholder="dd/mm/yyyy"></div>
+      <div style="align-self:end"><button class="btn ghost" id="btnFooter" type="button">Cập nhật Footer</button></div>
+    </div>
+    <div style="font-size:12.5px;color:var(--muted);margin-top:8px">Footer in ở chân mỗi trang: <b>Mã biểu mẫu</b> | <b>LBH … NHL …</b> | <b>Trang x/y</b> (Times New Roman 12).</div>
+    <div id="ftMsg" class="notice info hide" style="margin-top:8px"></div>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="dk">1 · Điều kiện dự thi</button>
+    <button class="tab" data-tab="tl">2 · Thi lại</button>
+    <button class="tab" data-tab="lt">3 · Điểm thi LT</button>
+    <button class="tab" data-tab="xtt">4 · Xếp thứ tự</button>
+    <button class="tab" data-tab="phieu">5 · Phiếu đánh giá TH</button>
+    <button class="tab" data-tab="nhap">6 · Nhập điểm hệ thống</button>
+  </nav>
+
+  <!-- TAB 1 -->
+  <section class="grid2 panel" id="p-dk">
+    <div class="card">
+      <h3>Thông số điều kiện dự thi</h3>
+      <label class="f">Hình thức thi — Lý thuyết <small>(hàng 11–12)</small></label>
+      <label class="chk"><input type="checkbox" data-k="tn_may"> Trắc nghiệm – Trên máy</label>
+      <label class="chk"><input type="checkbox" data-k="tn_giay"> Trắc nghiệm – Trên giấy</label>
+      <label class="chk"><input type="checkbox" data-k="van_dap"> Vấn đáp</label>
+      <label class="chk"><input type="checkbox" data-k="tu_luan"> Tự luận</label>
+      <label class="chk"><input type="checkbox" data-k="ht_khac"> Hình thức khác</label>
+      <label class="f">Thực hành — Địa điểm thi</label>
+      <input type="text" data-k="dia_diem">
+      <div class="row">
+        <div><label class="f">Số HSSV / ca</label><input type="text" data-k="so_ca" class="mono"></div>
+        <div><label class="f">Thời gian / ca</label><input type="text" data-k="tg_ca" class="mono"></div>
+      </div>
+      <label class="f">Thi tập trung cả lớp — thời gian (phút)</label>
+      <input type="text" data-k="tg_tt" class="mono">
+      <label class="f">Quy chế xét điều kiện dự thi</label>
+      <div class="seg">
+        <label><input type="radio" name="quy_che" value="2022"> 2022</label>
+        <label><input type="radio" name="quy_che" value="2021"> 2021</label>
+      </div>
+      <div class="sub" style="margin-top:6px">2022: vắng &gt; 20% tổng số tiết hoặc TBC KT &lt; 5.<br>2021: vắng LT &gt; 30%, vắng TH &gt; 0 hoặc TBC KT &lt; 5.</div>
+      <label class="chk" style="margin-top:14px"><input type="checkbox" data-k="drop"> Loại HSSV không có trong file điểm danh</label>
+    </div>
+    <div class="stack">
+      <div class="card res"><h3>Danh sách xét điều kiện dự thi</h3>
+        <div class="sub">Có cột “% tiết vắng” khi đã chọn File điểm danh (P và KP đều tính là vắng, mỗi buổi tính 1).</div>
+        <div style="margin-top:14px"><button class="btn primary" data-go="dk">Xuất file</button></div>
+        <div class="result" id="res-dk"></div></div>
+    </div>
+  </section>
+
+  <!-- TAB 2 -->
+  <section class="grid2 panel hide" id="p-tl">
+    <div class="card">
+      <h3>Thông số thi lại</h3>
+      <label class="f">Hình thức thi lý thuyết</label><input type="text" data-k="ht_lt">
+      <label class="f">Địa điểm thi TH</label><input type="text" data-k="dd_th">
+      <div class="sub" style="margin-top:6px">Ghi chú thi TH sẽ là: “Thi thực hành tại &lt;địa điểm thi TH&gt;”.</div>
+    </div>
+    <div class="stack">
+      <div class="card res"><h3>Danh sách HSSV thi lại</h3>
+        <div class="sub">Gồm HSSV có cột Đánh giá là “Thi lại”, sắp xếp như macro THIL.</div>
+        <div style="margin-top:14px"><button class="btn primary" data-go="tl">Xuất file</button></div>
+        <div class="result" id="res-tl"></div></div>
+    </div>
+  </section>
+
+  <!-- TAB 3 -->
+  <section class="grid2 panel hide" id="p-lt">
+    <div class="card">
+      <h3>Thông số điểm thi lý thuyết</h3>
+      <label class="f">Lần thi</label>
+      <div class="seg" style="flex-direction:column; gap:6px">
+        <label><input type="radio" name="lan" value="1"> Lần 1 (tất cả HSSV)</label>
+        <label><input type="radio" name="lan" value="2"> Lần 2 (HSSV có điểm LT lần 1 &lt; 5)</label>
+      </div>
+      <label class="f">Ca thi <small>(nhập tay)</small></label>
+      <input type="text" data-k="ca_thi" placeholder="Ca 4 - Ca 7 (23/1/2026)">
+      <div class="sub" style="margin-top:6px">Nội dung này in vào dòng “Ca thi:” của bảng điểm.</div>
+    </div>
+    <div class="stack">
+      <div class="notice">⚠ LƯU Ý: Chỉ xuất File điểm thi LT khi đây là <u>MÔ ĐUN</u> (ô A5 ghi “TÊN MÔ ĐUN: …”). Với MÔN HỌC, ứng dụng sẽ không xuất.</div>
+      <div id="ltBlock" class="notice hide"></div>
+      <div class="card res"><h3>Bảng điểm tổng hợp theo lớp — LT</h3>
+        <div style="margin-top:6px"><button class="btn primary" data-go="lt" id="btnLT">Xuất file</button></div>
+        <div class="result" id="res-lt"></div></div>
+    </div>
+  </section>
+
+  <!-- TAB 4 -->
+  <section class="grid2 panel hide" id="p-xtt">
+    <div class="card"><h3>Nội dung</h3>
+      <div class="sub" style="font-size:14px">Xuất 4 bảng theo điểm tổng kết (lần 1): HSSV có tổng kết ≥ 7, HSSV &lt; 5 (kể cả HSSV chưa có điểm), Top 3 và Bottom 3 — đúng nội dung sheet TK.</div></div>
+    <div class="stack">
+      <div class="card res"><h3>Xếp thứ tự</h3>
+        <div style="margin-top:6px"><button class="btn primary" data-go="xtt">Xuất file</button></div>
+        <div class="result" id="res-xtt"></div></div>
+    </div>
+  </section>
+
+  <!-- TAB 5 -->
+  <section class="grid2 panel hide" id="p-phieu">
+    <div class="card"><h3>Chọn bài kiểm tra định kỳ</h3>
+      <div class="seg" style="flex-direction:column; gap:8px; margin-top:8px">
+        <label><input type="radio" name="bai" value="1"> Bài 1 (KT định kỳ 1)</label>
+        <label><input type="radio" name="bai" value="2"> Bài 2 (KT định kỳ 2)</label>
+        <label><input type="radio" name="bai" value="3"> Bài 3 (KT định kỳ 3)</label>
+        <label><input type="radio" name="bai" value="4"> Bài 4 (KT định kỳ 4)</label>
+        <label><input type="radio" name="bai" value="5"> Bài 5 (KT định kỳ 5)</label>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card res"><h3>Phiếu đánh giá kết quả thực hành (Excel .xlsx)</h3>
+        <div class="sub">Mỗi điểm được tách thành 10 tiêu chí 0 / 0,5 / 1 có tổng đúng bằng điểm kiểm tra.</div>
+        <div style="margin-top:14px"><button class="btn primary" data-go="phieu">Xuất Excel</button></div>
+        <div class="result" id="res-phieu"></div></div>
+    </div>
+  </section>
+
+  <!-- TAB 6 -->
+  <section class="grid2 panel hide" id="p-nhap">
+    <div class="stack">
+      <div class="card res"><h3>Form nhập điểm quá trình</h3>
+        <div class="sub">Điền KT thường xuyên, KT định kỳ 1–5, TBC KT, "V" (đủ ĐK dự thi) và điểm tổng kết vào file mẫu của hệ thống.</div>
+        <div class="drop" id="dropQt" tabindex="0" style="margin-top:12px">
+          <div class="t">File mẫu Form nhập quá trình (.xlsx)</div>
+          <div class="n" id="nmQt">Bấm để chọn hoặc kéo thả tệp vào đây</div>
+        </div>
+        <input type="file" id="fileQt" accept=".xlsx,.xlsm" class="hide">
+        <div class="sub" style="margin-top:8px">Quy chế xét ĐK dự thi lấy theo tab 1 (2021 / 2022) và file điểm danh nếu đã chọn.</div>
+        <div style="margin-top:12px"><button class="btn primary" data-go="qt">Điền &amp; xuất file</button></div>
+        <div class="result" id="res-qt"></div></div>
+    </div>
+    <div class="stack">
+      <div class="card res"><h3>Form nhập điểm thi kết thúc mô đun</h3>
+        <div class="sub">Điền điểm thi LT (DiemThiKN1) và TH (DiemThiKN2) vào file mẫu của hệ thống.</div>
+        <div class="drop" id="dropKt" tabindex="0" style="margin-top:12px">
+          <div class="t">File mẫu Form nhập thi kết thúc mô đun (.xlsx)</div>
+          <div class="n" id="nmKt">Bấm để chọn hoặc kéo thả tệp vào đây</div>
+        </div>
+        <input type="file" id="fileKt" accept=".xlsx,.xlsm" class="hide">
+        <label class="f">Lần thi</label>
+        <div class="seg">
+          <label><input type="radio" name="lan_kt" value="1"> Lần 1</label>
+          <label><input type="radio" name="lan_kt" value="2"> Lần 2</label>
+        </div>
+        <div style="margin-top:12px"><button class="btn primary" data-go="kt">Điền &amp; xuất file</button></div>
+        <div class="result" id="res-kt"></div></div>
+      <div class="notice info">File mẫu tải từ hệ thống thường là <b>.xls</b>: mở bằng Excel → <i>Save As</i> → <i>Excel Workbook (.xlsx)</i> rồi chọn ở đây. File xuất ra là .xlsx (HSSV khớp theo Mã sinh viên).</div>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+"use strict";
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+let loaded = null;     // meta đã đọc
+
+async function api(method, url, body, raw){
+  const opt = {method, headers:{}};
+  if(body !== undefined){
+    if(raw){ opt.body = body; }
+    else { opt.body = JSON.stringify(body); opt.headers["Content-Type"] = "application/json"; }
+  }
+  let r, data;
+  try { r = await fetch(url, opt); } catch(e){ throw new Error("Mất kết nối tới ứng dụng (đã bị tắt?). Hãy mở lại."); }
+  try { data = await r.json(); } catch(e){ data = {ok:false, error:"Phản hồi không hợp lệ."}; }
+  if(r.status === 401 && url !== "/api/login"){ showLogin(); throw new Error("Phiên đã hết, hãy đăng nhập lại."); }
+  if(!r.ok || data.ok === false) throw new Error(data.error || ("Lỗi " + r.status));
+  return data;
+}
+const show = (el, on=true) => el.classList.toggle("hide", !on);
+function showMsg(el, text){ el.textContent = text || ""; show(el, !!text); }
+
+/* ---------- đăng nhập ---------- */
+function showLogin(){ show($("#appView"), false); show($("#loginView"), true); $("#lgPw").value=""; }
+async function showApp(user){
+  show($("#loginView"), false); show($("#appView"), true);
+  $("#userName").textContent = "Tài khoản: " + user;
+  const c = await api("GET", "/api/config");
+  fillConfig(c.config);
+  $("#foot").textContent = "Font file xuất: " + c.font + " · Dữ liệu chỉ xử lý trên máy này, không gửi ra Internet.";
+  if(c.files.input) setName("input", c.files.input);
+  if(c.files.att) setName("att", c.files.att);
+  if(c.files.input) await reload();
+  if(!window._ping){ window._ping = setInterval(() => fetch("/api/ping").catch(()=>{}), 8000); }
+}
+$("#loginForm").addEventListener("submit", async ev => {
+  ev.preventDefault(); showMsg($("#lgErr"), "");
+  try{
+    const d = await api("POST", "/api/login", {user:$("#lgUser").value, password:$("#lgPw").value});
+    await showApp(d.user);
+  }catch(e){ showMsg($("#lgErr"), e.message); $("#lgPw").value=""; $("#lgPw").focus(); }
+});
+$("#btnLogout").onclick = async () => { await api("POST","/api/logout",{}).catch(()=>{}); showLogin(); };
+$("#btnQuit").onclick = async () => {
+  if(!confirm("Thoát ứng dụng? (Có thể mở lại bằng cách chạy lại chương trình)")) return;
+  await api("POST","/api/quit",{}).catch(()=>{});
+  document.body.innerHTML = '<div class="loginwrap"><div class="card login"><h2>Đã thoát ứng dụng</h2><div class="sub">Có thể đóng tab này.</div></div></div>';
+};
+
+/* ---------- cấu hình ---------- */
+const DEFAULTS = {tbm:"CƠ KHÍ", dia_diem:"Phòng máy tính", so_ca:"-", tg_ca:"-", tg_tt:"-", quy_che:"2022",
+  ft_dk:"BM/CL/05.01", ft_tl:"BM/CL/05.02", ft_lt:"BM/CL/05.04a", ft_tk:"", ft_lbh:"06", ft_nhl:"02/03/2026", fmt:"pdf",
+  ht_lt:"Thi trắc nghiệm trên máy tính", dd_th:"xưởng TBĐ", tn_may:true, drop:true, ca_thi:""};
+function todayStr(){ const d=new Date(), p=n=>String(n).padStart(2,"0"); return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear(); }
+function fillConfig(cfg){
+  const c = Object.assign({}, DEFAULTS, cfg||{});
+  if(!c.ngay) c.ngay = todayStr();
+  $$("[data-k]").forEach(el => {
+    const v = c[el.dataset.k];
+    if(el.type === "checkbox") el.checked = !!v; else el.value = (v==null?"":v);
+  });
+  const set = (name, val) => { const r = $(`input[name=${name}][value="${val}"]`); if(r) r.checked = true; };
+  set("fmt", c.fmt); set("lan_kt", c.lan_kt||1); set("quy_che", c.quy_che); set("lan", c.lan||1); set("bai", c.bai||1);
+}
+function collect(){
+  const o = {};
+  $$("[data-k]").forEach(el => { o[el.dataset.k] = el.type==="checkbox" ? el.checked : el.value.trim(); });
+  for(const n of ["quy_che","lan","lan_kt","bai","fmt"]){ const r = $(`input[name=${n}]:checked`); if(r) o[n] = r.value; }
+  return o;
+}
+
+/* ---------- tải tệp ---------- */
+function setName(kind, name){
+  const el = {input:$("#nmInput"), att:$("#nmAtt"), tpl_qt:$("#nmQt"), tpl_kt:$("#nmKt")}[kind];
+  el.textContent = "✔ " + name;
+  if(kind==="att") show($("#btnClearAtt"), true);
+}
+async function upload(kind, file){
+  showMsg($("#loadErr"), "");
+  if(!file) return;
+  if(kind.startsWith("tpl_") && /\.xls$/i.test(file.name)){ alert("File .xls (Excel cũ) chưa đọc được.\nMở bằng Excel → Save As → Excel Workbook (.xlsx) rồi chọn lại."); return; }
+  if(!/\.(xlsx|xlsm)$/i.test(file.name)){ showMsg($("#loadErr"), "Chỉ nhận tệp Excel (.xlsx hoặc .xlsm)."); return; }
+  try{
+    const buf = await file.arrayBuffer();
+    await api("POST", `/api/upload?kind=${kind}&name=${encodeURIComponent(file.name)}`, buf, true);
+    setName(kind, file.name);
+    if(!kind.startsWith("tpl_")) await reload();
+  }catch(e){ showMsg($("#loadErr"), e.message); if(kind.startsWith("tpl_")) alert(e.message); }
+}
+function wireDrop(dropId, inputId, kind){
+  const d = $(dropId), f = $(inputId);
+  d.onclick = () => f.click();
+  d.onkeydown = e => { if(e.key==="Enter"||e.key===" "){ e.preventDefault(); f.click(); } };
+  f.onchange = () => { upload(kind, f.files[0]); f.value=""; };
+  d.ondragover = e => { e.preventDefault(); d.classList.add("over"); };
+  d.ondragleave = () => d.classList.remove("over");
+  d.ondrop = e => { e.preventDefault(); d.classList.remove("over"); upload(kind, e.dataTransfer.files[0]); };
+}
+wireDrop("#dropInput", "#fileInput", "input");
+wireDrop("#dropAtt", "#fileAtt", "att");
+wireDrop("#dropQt", "#fileQt", "tpl_qt");
+wireDrop("#dropKt", "#fileKt", "tpl_kt");
+$("#btnClearAtt").onclick = async () => {
+  await api("POST","/api/clear",{kind:"att"});
+  $("#nmAtt").textContent = "Chỉ dùng cho tab Điều kiện dự thi"; show($("#btnClearAtt"), false);
+  await reload();
+};
+
+async function reload(){
+  showMsg($("#loadErr"), ""); showMsg($("#loadWarn"), "");
+  try{
+    const d = await api("POST", "/api/load", {drop: $("[data-k=drop]").checked});
+    loaded = d.meta;
+    const m = d.meta;
+    show($("#summary"), true);
+    $("#sLoai").textContent = m.loai || "—";
+    $("#sLoai").classList.toggle("mon", !m.la_mo_dun);
+    $("#sTen").textContent = m.ten;
+    $("#sLop").textContent = m.lop_khoa + (m.he ? "  ·  " + m.he.replace(/^HỆ:\s*/i,"") : "");
+    $("#sGio").textContent = m.tong_gio + " giờ  (LT " + m.gio_lt + " · TH " + m.gio_th + ")";
+    $("#sN").textContent = m.n;
+    $("#tbody").innerHTML = d.students.map(s =>
+      `<tr><td class="n">${s.stt}</td><td>${esc(s.name)}</td><td class="mono">${esc(s.mssv)}</td><td class="n">${esc(s.o)}</td><td class="n">${esc(s.s)}</td><td>${esc(s.x)}</td><td class="n">${esc(s.vang)}</td></tr>`).join("");
+    if(d.warnings && d.warnings.length) showMsg($("#loadWarn"), d.warnings.join("\n"));
+    updateLT();
+  }catch(e){
+    loaded = null; show($("#summary"), false); showMsg($("#loadErr"), e.message); updateLT();
+  }
+}
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function updateLT(){
+  const blk = $("#ltBlock"), btn = $("#btnLT");
+  if(loaded && !loaded.la_mo_dun){
+    blk.textContent = `File đang đọc là "${loaded.loai}" (${loaded.ten}) — không xuất được File điểm thi LT.`;
+    show(blk, true); btn.disabled = true;
+  } else { show(blk, false); btn.disabled = false; }
+}
+$("[data-k=drop]").addEventListener("change", () => { if($("#nmInput").textContent.startsWith("✔")) reload(); });
+$("#p-dk").addEventListener("change", ()=>{});
+
+/* ---------- tab ---------- */
+$("#tabs").addEventListener("click", e => {
+  const b = e.target.closest(".tab"); if(!b) return;
+  $$(".tab").forEach(t => t.classList.toggle("active", t === b));
+  $$(".panel").forEach(p => show(p, p.id === "p-" + b.dataset.tab));
+});
+
+/* ---------- cập nhật footer ---------- */
+$("#btnFooter").onclick = async () => {
+  const o = collect(), keys = ["ft_dk","ft_tl","ft_lt","ft_tk","ft_lbh","ft_nhl"], upd = {fmt:o.fmt};
+  keys.forEach(k => upd[k] = o[k] || "");
+  const m = $("#ftMsg");
+  try{ await api("POST","/api/config",upd); m.textContent = "✔ Đã cập nhật Footer — sẽ dùng cho các file xuất tiếp theo (PDF và Excel)."; m.className = "notice info"; }
+  catch(e){ m.textContent = e.message; m.className = "notice err"; }
+};
+
+/* ---------- xuất file ---------- */
+async function doExport(kind, btn){
+  const res = $("#res-" + kind);
+  res.innerHTML = "";
+  const o = collect();
+  if(!$("#nmInput").textContent.startsWith("✔")){ res.innerHTML = `<div class="notice err">Chưa chọn file Form nhập điểm (ô ① phía trên).</div>`; return; }
+  if((kind==="dk"||kind==="tl") && !o.ma_lhp && !confirm("Mã LHP đang để trống. Vẫn xuất file?")) return;
+  if(kind==="qt" && !$("#nmQt").textContent.startsWith("✔")){ res.innerHTML = `<div class="notice err">Chưa chọn file mẫu Form nhập quá trình.</div>`; return; }
+  if(kind==="kt" && !$("#nmKt").textContent.startsWith("✔")){ res.innerHTML = `<div class="notice err">Chưa chọn file mẫu Form nhập thi kết thúc mô đun.</div>`; return; }
+  if(kind==="lt" && !o.ca_thi && !confirm("Mục Ca thi đang để trống. Vẫn xuất file?")) return;
+  const old = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Đang xuất…';
+  try{
+    const d = await api("POST", "/api/export/" + kind, o);
+    const isPdf = /\.pdf$/i.test(d.filename);
+    res.innerHTML = `<div class="ok">✔ Đã xuất xong${d.note ? " · " + esc(d.note) : ""}</div>
+      <div class="fn" style="margin-top:8px">${esc(d.filename)}</div>
+      <div class="pth">${esc(d.path)}</div>
+      <div class="acts">
+        ${isPdf ? `<a class="btn primary small" style="text-decoration:none" target="_blank" href="/download/${d.id}?inline=1">Xem PDF</a>` : ""}
+        <button class="btn ghost small" data-open="file" data-id="${d.id}">Mở file</button>
+        <button class="btn ghost small" data-open="folder" data-id="${d.id}">Mở thư mục</button>
+        <a class="btn ghost small" style="text-decoration:none" href="/download/${d.id}">Tải về</a>
+      </div>` + (d.warnings && d.warnings.length ? `<div class="notice info err">${esc(d.warnings.join("\n"))}</div>` : "");
+  }catch(e){ res.innerHTML = `<div class="notice err" style="white-space:pre-wrap">${esc(e.message)}</div>`; }
+  finally{ btn.disabled = false; btn.innerHTML = old; if(kind==="lt") updateLT(); }
+}
+$$("[data-go]").forEach(b => b.onclick = () => doExport(b.dataset.go, b));
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-open]"); if(!b) return;
+  try{ await api("POST","/api/open",{id:b.dataset.id, what:b.dataset.open}); }catch(err){ alert(err.message); }
+});
+
+/* ---------- khởi động ---------- */
+(async () => {
+  try{
+    const me = await api("GET", "/api/me");
+    if(me.authed) await showApp(me.user);
+    else { $("#lgUser").value = me.last_user || ""; showLogin(); ($("#lgUser").value ? $("#lgPw") : $("#lgUser")).focus(); }
+  }catch(e){ document.body.textContent = e.message; }
+})();
+</script>
+</body>
+</html>
